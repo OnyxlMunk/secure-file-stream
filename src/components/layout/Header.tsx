@@ -3,12 +3,12 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Shield, LogOut, User, Coins, Folder, Home } from 'lucide-react';
+import { Shield, LogOut, User, Coins, Folder, Home, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 
 const Header = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, isAdmin } = useAuth();
   const location = useLocation();
 
   const getUserInitials = () => {
@@ -65,6 +65,18 @@ const Header = () => {
                 Subscription
               </Button>
             </Link>
+            {isAdmin && (
+              <Link to="/admin">
+                <Button 
+                  variant={location.pathname === '/admin' ? 'default' : 'ghost'} 
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  Admin
+                </Button>
+              </Link>
+            )}
           </nav>
 
           {/* User Menu */}
@@ -85,6 +97,11 @@ const Header = () => {
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email}
                 </p>
+                {isAdmin && (
+                  <p className="text-xs leading-none text-orange-600 font-medium">
+                    Administrator
+                  </p>
+                )}
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex items-center gap-2">

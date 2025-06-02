@@ -9,6 +9,96 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      api_logs: {
+        Row: {
+          admin_user_id: string
+          created_at: string | null
+          endpoint: string
+          id: string
+          ip_address: unknown | null
+          method: string
+          parameters: Json | null
+          response_data: Json | null
+          response_status: number | null
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          ip_address?: unknown | null
+          method: string
+          parameters?: Json | null
+          response_data?: Json | null
+          response_status?: number | null
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          ip_address?: unknown | null
+          method?: string
+          parameters?: Json | null
+          response_data?: Json | null
+          response_status?: number | null
+        }
+        Relationships: []
+      }
+      chatbot_interactions: {
+        Row: {
+          admin_user_id: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          query: string
+          response: string
+        }
+        Insert: {
+          admin_user_id: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          query: string
+          response: string
+        }
+        Update: {
+          admin_user_id?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          query?: string
+          response?: string
+        }
+        Relationships: []
+      }
       encrypted_files: {
         Row: {
           encrypted_filename: string
@@ -242,15 +332,92 @@ export type Database = {
           },
         ]
       }
+      user_activities: {
+        Row: {
+          activity_description: string
+          activity_type: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_description: string
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_description?: string
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      log_user_activity: {
+        Args: {
+          p_user_id: string
+          p_activity_type: string
+          p_activity_description: string
+          p_metadata?: Json
+          p_ip_address?: unknown
+        }
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -365,6 +532,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

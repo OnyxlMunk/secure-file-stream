@@ -13,6 +13,8 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   profile: any;
   refreshProfile: () => Promise<void>;
+  isAdmin: boolean;
+  userRole: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +24,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchProfile = async (userId: string) => {
@@ -39,9 +43,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const fetchUserRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user role:', error);
+        setUserRole('user');
+        setIsAdmin(false);
+        return;
+      }
+
+      setUserRole(data.role);
+      setIsAdmin(data.role === 'admin');
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+      setUserRole('user');
+      setIsAdmin(false);
+    }
+  };
+
   const refreshProfile = async () => {
     if (user) {
       await fetchProfile(user.id);
+      await fetchUserRole(user.id);
     }
   };
 
@@ -64,9 +93,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile when logged in
+          // Fetch user profile and role when logged in
           setTimeout(async () => {
             await fetchProfile(session.user.id);
+            await fetchUserRole(session.user.id);
             // Check subscription status after profile is loaded
             setTimeout(() => {
               checkSubscription();
@@ -74,6 +104,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }, 0);
         } else {
           setProfile(null);
+          setUserRole(null);
+          setIsAdmin(false);
         }
         
         setLoading(false);
@@ -87,7 +119,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (session?.user) {
         fetchProfile(session.user.id).then(() => {
-          checkSubscription();
+          fetchUserRole(session.user.id).then(() => {
+            checkSubscription();
+          });
         });
       }
       
@@ -162,7 +196,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signIn,
       signOut,
       profile,
-      refreshProfile
+      refreshProfile,
+      isAdmin,
+      userRole
     }}>
       {children}
     </AuthContext.Provider>
