@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import FileBanks from "./pages/FileBanks";
 import NotFound from "./pages/NotFound";
+import Subscription from "./pages/Subscription";
+import Success from "./pages/Success";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,16 @@ const App = () => (
             <Route path="/file-banks" element={
               <ProtectedRoute>
                 <FileBanks />
+              </ProtectedRoute>
+            } />
+            <Route path="/subscription" element={
+              <ProtectedRoute>
+                <Subscription />
+              </ProtectedRoute>
+            } />
+            <Route path="/success" element={
+              <ProtectedRoute>
+                <Success />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

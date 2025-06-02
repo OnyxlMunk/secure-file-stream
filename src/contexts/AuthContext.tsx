@@ -45,6 +45,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const checkSubscription = async () => {
+    if (user) {
+      try {
+        await supabase.functions.invoke('check-subscription');
+        await refreshProfile();
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -54,8 +65,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session?.user) {
           // Fetch user profile when logged in
-          setTimeout(() => {
-            fetchProfile(session.user.id);
+          setTimeout(async () => {
+            await fetchProfile(session.user.id);
+            // Check subscription status after profile is loaded
+            setTimeout(() => {
+              checkSubscription();
+            }, 1000);
           }, 0);
         } else {
           setProfile(null);
@@ -71,7 +86,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchProfile(session.user.id);
+        fetchProfile(session.user.id).then(() => {
+          checkSubscription();
+        });
       }
       
       setLoading(false);

@@ -55,6 +55,16 @@ const Header = () => {
                 File Banks
               </Button>
             </Link>
+            <Link to="/subscription">
+              <Button 
+                variant={location.pathname === '/subscription' ? 'default' : 'ghost'} 
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Coins className="h-4 w-4" />
+                Subscription
+              </Button>
+            </Link>
           </nav>
 
           {/* User Menu */}

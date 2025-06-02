@@ -131,6 +131,8 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          max_file_size_mb: number | null
+          max_monthly_encryptions: number | null
           points: number | null
           subscription_tier: string | null
           updated_at: string | null
@@ -141,6 +143,8 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          max_file_size_mb?: number | null
+          max_monthly_encryptions?: number | null
           points?: number | null
           subscription_tier?: string | null
           updated_at?: string | null
@@ -151,11 +155,57 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          max_file_size_mb?: number | null
+          max_monthly_encryptions?: number | null
           points?: number | null
           subscription_tier?: string | null
           updated_at?: string | null
         }
         Relationships: []
+      }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          stripe_customer_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscribers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {
