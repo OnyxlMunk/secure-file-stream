@@ -23,12 +23,23 @@ const ActivityLogs = () => {
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching activities:', error);
+        // If the direct join fails, try a simpler approach
+        const { data: simpleData, error: simpleError } = await supabase
+          .from('user_activities')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+        
+        if (simpleError) throw simpleError;
+        return simpleData || [];
+      }
       return data || [];
     }
   });
 
-  const getActivityBadgeColor = (type: string) => {
+  const getActivityBadgeColor = (type: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (type.toLowerCase()) {
       case 'login':
         return 'default';
@@ -75,9 +86,11 @@ const ActivityLogs = () => {
             <TableBody>
               {activities?.map((activity) => (
                 <TableRow key={activity.id}>
-                  <TableCell>{activity.profiles?.email || 'Unknown'}</TableCell>
                   <TableCell>
-                    <Badge variant={getActivityBadgeColor(activity.activity_type) as "default" | "secondary" | "destructive" | "outline"}>
+                    {(activity as any).profiles?.email || activity.user_id || 'Unknown'}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getActivityBadgeColor(activity.activity_type)}>
                       {activity.activity_type}
                     </Badge>
                   </TableCell>
