@@ -56,9 +56,11 @@ const ActivityLogs = () => {
     }
   };
 
-  const formatDate = (dateValue: unknown): string => {
+  const formatDate = (dateValue: any): string => {
+    if (!dateValue) return 'N/A';
     try {
-      return dateValue ? new Date(String(dateValue)).toLocaleString() : 'N/A';
+      const date = new Date(dateValue);
+      return date.toLocaleString();
     } catch {
       return 'Invalid Date';
     }
