@@ -15,7 +15,7 @@ const ActivityLogs = () => {
         .from('user_activities')
         .select(`
           *,
-          profiles (
+          profiles!user_activities_user_id_fkey (
             email,
             full_name
           )
@@ -77,7 +77,7 @@ const ActivityLogs = () => {
                 <TableRow key={activity.id}>
                   <TableCell>{activity.profiles?.email || 'Unknown'}</TableCell>
                   <TableCell>
-                    <Badge variant={getActivityBadgeColor(activity.activity_type)}>
+                    <Badge variant={getActivityBadgeColor(activity.activity_type) as "default" | "secondary" | "destructive" | "outline"}>
                       {activity.activity_type}
                     </Badge>
                   </TableCell>

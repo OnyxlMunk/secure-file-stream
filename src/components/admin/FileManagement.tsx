@@ -15,16 +15,18 @@ const FileManagement = () => {
         .from('encrypted_files')
         .select(`
           *,
-          file_banks (
-            name,
-            user_id,
-            profiles (
-              email,
-              full_name
+          file_bank_files (
+            file_banks (
+              name,
+              user_id,
+              profiles!file_banks_user_id_fkey (
+                email,
+                full_name
+              )
             )
           )
         `)
-        .order('created_at', { ascending: false });
+        .order('encryption_date', { ascending: false });
 
       if (error) throw error;
       return data || [];
@@ -38,7 +40,7 @@ const FileManagement = () => {
         .from('file_banks')
         .select(`
           *,
-          profiles (
+          profiles!file_banks_user_id_fkey (
             email,
             full_name
           )
@@ -117,17 +119,20 @@ const FileManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {files?.map((file) => (
-                    <TableRow key={file.id}>
-                      <TableCell className="font-medium">{file.filename}</TableCell>
-                      <TableCell>{file.file_banks?.name || 'Unknown'}</TableCell>
-                      <TableCell>{file.file_banks?.profiles?.email || 'Unknown'}</TableCell>
-                      <TableCell>{formatFileSize(file.file_size || 0)}</TableCell>
-                      <TableCell>
-                        {new Date(file.created_at).toLocaleDateString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {files?.map((file) => {
+                    const fileBank = file.file_bank_files?.[0]?.file_banks;
+                    return (
+                      <TableRow key={file.id}>
+                        <TableCell className="font-medium">{file.original_filename}</TableCell>
+                        <TableCell>{fileBank?.name || 'Direct Upload'}</TableCell>
+                        <TableCell>{fileBank?.profiles?.email || 'Unknown'}</TableCell>
+                        <TableCell>{formatFileSize(file.file_size || 0)}</TableCell>
+                        <TableCell>
+                          {new Date(file.encryption_date).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
