@@ -12,11 +12,13 @@ import { Shield, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/layout/Header';
+import FileBankSelector from '@/components/FileBankSelector';
 
 const Index = () => {
   const [password, setPassword] = useState('');
   const [files, setFiles] = useState<ProcessedFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedBankId, setSelectedBankId] = useState<string | null>(null);
   const { toast } = useToast();
   const { profile, refreshProfile } = useAuth();
 
@@ -163,6 +165,9 @@ const Index = () => {
     // Deduct points before processing
     await deductPoints(operation, pendingFiles.length);
 
+    // Store file IDs for potential bank assignment
+    const processedFileIds: string[] = [];
+
     for (const file of pendingFiles) {
       try {
         setFiles(prev => prev.map(f => 
@@ -189,7 +194,7 @@ const Index = () => {
 
           // Save encrypted file record to database
           try {
-            const { error: dbError } = await supabase
+            const { data: fileRecord, error: dbError } = await supabase
               .from('encrypted_files')
               .insert({
                 user_id: profile?.id,
@@ -197,9 +202,15 @@ const Index = () => {
                 encrypted_filename: `${file.originalFile.name}.encrypted`,
                 file_size: file.originalFile.size,
                 points_cost: 1
-              });
+              })
+              .select()
+              .single();
 
-            if (dbError) console.error('Error saving file record:', dbError);
+            if (dbError) {
+              console.error('Error saving file record:', dbError);
+            } else if (fileRecord) {
+              processedFileIds.push(fileRecord.id);
+            }
           } catch (dbError) {
             console.error('Database error:', dbError);
           }
@@ -262,6 +273,9 @@ const Index = () => {
     }
   };
 
+  const completedFiles = files.filter(f => f.status === 'completed' && 'encryptedData' in (f.result || {}));
+  const encryptedFileIds = completedFiles.map(f => f.id);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
@@ -309,6 +323,20 @@ const Index = () => {
               Decrypt Files (1 point each)
             </Button>
           </div>
+
+          {/* File Bank Selector */}
+          {completedFiles.length > 0 && (
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium">Organize Files</h3>
+                <FileBankSelector
+                  selectedBankId={selectedBankId}
+                  onBankSelect={setSelectedBankId}
+                  fileIds={encryptedFileIds}
+                />
+              </div>
+            </div>
+          )}
 
           <FileList
             files={files}

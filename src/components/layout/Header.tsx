@@ -3,11 +3,13 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Shield, LogOut, User, Coins } from 'lucide-react';
+import { Shield, LogOut, User, Coins, Folder, Home } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Link, useLocation } from 'react-router-dom';
 
 const Header = () => {
   const { user, profile, signOut } = useAuth();
+  const location = useLocation();
 
   const getUserInitials = () => {
     if (profile?.full_name) {
@@ -30,6 +32,30 @@ const Header = () => {
             <Shield className="h-8 w-8 text-primary" />
             <h1 className="text-xl font-bold">Secure File Encryption</h1>
           </div>
+
+          {/* Navigation */}
+          <nav className="flex items-center gap-4">
+            <Link to="/">
+              <Button 
+                variant={location.pathname === '/' ? 'default' : 'ghost'} 
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Home className="h-4 w-4" />
+                Encrypt
+              </Button>
+            </Link>
+            <Link to="/file-banks">
+              <Button 
+                variant={location.pathname === '/file-banks' ? 'default' : 'ghost'} 
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Folder className="h-4 w-4" />
+                File Banks
+              </Button>
+            </Link>
+          </nav>
 
           {/* User Menu */}
           <DropdownMenu>
