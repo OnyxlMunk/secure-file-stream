@@ -9,12 +9,16 @@ import { CryptoService } from '@/utils/crypto';
 import { PasswordValidator } from '@/utils/passwordValidator';
 import { ProcessedFile, OperationType } from '@/types/crypto';
 import { Shield, Download } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import Header from '@/components/layout/Header';
 
 const Index = () => {
   const [password, setPassword] = useState('');
   const [files, setFiles] = useState<ProcessedFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const { profile, refreshProfile } = useAuth();
 
   const handleFilesSelected = (selectedFiles: File[]) => {
     const newFiles: ProcessedFile[] = selectedFiles.map(file => ({
@@ -44,7 +48,6 @@ const Index = () => {
     let filename: string;
 
     if ('encryptedData' in file.result) {
-      // Encrypted file
       blob = CryptoService.createEncryptedBlob(
         file.result.encryptedData,
         file.result.iv,
@@ -53,7 +56,6 @@ const Index = () => {
       );
       filename = `${file.originalFile.name}.encrypted`;
     } else {
-      // Decrypted file
       blob = new Blob([file.result.decryptedData]);
       filename = file.result.filename;
     }
@@ -71,6 +73,63 @@ const Index = () => {
       title: "Download started",
       description: `Downloading ${filename}`,
     });
+  };
+
+  const checkPoints = (operation: OperationType, fileCount: number) => {
+    const pointsNeeded = fileCount;
+    const currentPoints = profile?.points || 0;
+    
+    if (currentPoints < pointsNeeded) {
+      toast({
+        title: "Insufficient points",
+        description: `You need ${pointsNeeded} points but only have ${currentPoints}. Upgrade your plan for more points.`,
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const deductPoints = async (operation: OperationType, fileCount: number) => {
+    try {
+      const pointsUsed = fileCount;
+      
+      // Update user points
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ points: (profile?.points || 0) - pointsUsed })
+        .eq('id', profile?.id);
+
+      if (updateError) throw updateError;
+
+      // Record transaction
+      const { error: transactionError } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: profile?.id,
+          type: operation,
+          points_change: -pointsUsed,
+          description: `${operation} ${fileCount} file(s)`
+        });
+
+      if (transactionError) throw transactionError;
+
+      // Refresh profile to update points display
+      await refreshProfile();
+
+      toast({
+        title: "Points deducted",
+        description: `Used ${pointsUsed} points for ${operation}`,
+      });
+
+    } catch (error) {
+      console.error('Error deducting points:', error);
+      toast({
+        title: "Error",
+        description: "Failed to deduct points",
+        variant: "destructive",
+      });
+    }
   };
 
   const processFiles = async (operation: OperationType) => {
@@ -94,11 +153,18 @@ const Index = () => {
       return;
     }
 
+    // Check if user has enough points
+    if (!checkPoints(operation, pendingFiles.length)) {
+      return;
+    }
+
     setIsProcessing(true);
+
+    // Deduct points before processing
+    await deductPoints(operation, pendingFiles.length);
 
     for (const file of pendingFiles) {
       try {
-        // Update status to processing
         setFiles(prev => prev.map(f => 
           f.id === file.id ? { ...f, status: 'processing' as const, progress: 0 } : f
         ));
@@ -120,8 +186,24 @@ const Index = () => {
             ...encryptionResult,
             filename: file.originalFile.name,
           };
+
+          // Save encrypted file record to database
+          try {
+            const { error: dbError } = await supabase
+              .from('encrypted_files')
+              .insert({
+                user_id: profile?.id,
+                original_filename: file.originalFile.name,
+                encrypted_filename: `${file.originalFile.name}.encrypted`,
+                file_size: file.originalFile.size,
+                points_cost: 1
+              });
+
+            if (dbError) console.error('Error saving file record:', dbError);
+          } catch (dbError) {
+            console.error('Database error:', dbError);
+          }
         } else {
-          // Decrypt
           const parsedFile = await CryptoService.parseEncryptedFile(file.originalFile);
           const decryptedData = await CryptoService.decryptFile(
             parsedFile.encryptedData,
@@ -141,7 +223,6 @@ const Index = () => {
           };
         }
 
-        // Update status to completed
         setFiles(prev => prev.map(f => 
           f.id === file.id ? { 
             ...f, 
@@ -182,33 +263,32 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3">
-            <Shield className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Secure File Encryption</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Header />
+      
+      <div className="max-w-4xl mx-auto p-4 space-y-8">
+        {/* Welcome Message */}
+        <div className="text-center space-y-4 pt-8">
+          <h2 className="text-2xl font-bold">
+            Welcome back, {profile?.full_name || 'User'}!
+          </h2>
+          <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+            <span>Points: {profile?.points || 0}</span>
+            <span>•</span>
+            <span>Plan: {profile?.subscription_tier || 'Free'}</span>
           </div>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Encrypt and decrypt your files securely using AES-256-GCM encryption. 
-            All processing happens locally in your browser - your files never leave your device.
-          </p>
         </div>
 
         {/* Main Content */}
         <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-          {/* File Drop Zone */}
           <FileDropZone onFilesSelected={handleFilesSelected} />
 
-          {/* Password Input */}
           <PasswordInput
             value={password}
             onChange={setPassword}
             placeholder="Enter a strong password (12+ characters)"
           />
 
-          {/* Action Buttons */}
           <div className="flex gap-4 justify-center">
             <Button
               onClick={() => processFiles('encrypt')}
@@ -216,7 +296,7 @@ const Index = () => {
               className="flex items-center gap-2"
             >
               <Shield className="h-4 w-4" />
-              Encrypt Files
+              Encrypt Files (1 point each)
             </Button>
             
             <Button
@@ -226,11 +306,10 @@ const Index = () => {
               className="flex items-center gap-2"
             >
               <Download className="h-4 w-4" />
-              Decrypt Files
+              Decrypt Files (1 point each)
             </Button>
           </div>
 
-          {/* File List */}
           <FileList
             files={files}
             onRemoveFile={handleRemoveFile}
@@ -245,7 +324,7 @@ const Index = () => {
             <li>• All encryption/decryption happens locally in your browser</li>
             <li>• Your files and passwords are never sent to any server</li>
             <li>• Uses AES-256-GCM encryption with PBKDF2 key derivation</li>
-            <li>• Remember your password - it cannot be recovered if lost</li>
+            <li>• Each operation costs 1 point from your account</li>
           </ul>
         </div>
       </div>

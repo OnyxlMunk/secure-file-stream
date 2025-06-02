@@ -9,7 +9,189 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      encrypted_files: {
+        Row: {
+          encrypted_filename: string
+          encryption_date: string | null
+          file_hash: string | null
+          file_size: number
+          id: string
+          metadata: Json | null
+          original_filename: string
+          points_cost: number | null
+          user_id: string
+        }
+        Insert: {
+          encrypted_filename: string
+          encryption_date?: string | null
+          file_hash?: string | null
+          file_size: number
+          id?: string
+          metadata?: Json | null
+          original_filename: string
+          points_cost?: number | null
+          user_id: string
+        }
+        Update: {
+          encrypted_filename?: string
+          encryption_date?: string | null
+          file_hash?: string | null
+          file_size?: number
+          id?: string
+          metadata?: Json | null
+          original_filename?: string
+          points_cost?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encrypted_files_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      file_bank_files: {
+        Row: {
+          added_at: string | null
+          encrypted_file_id: string
+          file_bank_id: string
+          id: string
+        }
+        Insert: {
+          added_at?: string | null
+          encrypted_file_id: string
+          file_bank_id: string
+          id?: string
+        }
+        Update: {
+          added_at?: string | null
+          encrypted_file_id?: string
+          file_bank_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_bank_files_encrypted_file_id_fkey"
+            columns: ["encrypted_file_id"]
+            isOneToOne: false
+            referencedRelation: "encrypted_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "file_bank_files_file_bank_id_fkey"
+            columns: ["file_bank_id"]
+            isOneToOne: false
+            referencedRelation: "file_banks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      file_banks: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_banks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          points: number | null
+          subscription_tier: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          points?: number | null
+          subscription_tier?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          points?: number | null
+          subscription_tier?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          points_change: number
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          points_change: number
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          points_change?: number
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
