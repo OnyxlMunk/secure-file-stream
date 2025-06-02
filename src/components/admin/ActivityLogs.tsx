@@ -66,6 +66,11 @@ const ActivityLogs = () => {
     }
   };
 
+  const formatDescription = (description: any): string => {
+    if (!description) return '';
+    return String(description);
+  };
+
   if (isLoading) {
     return <div className="animate-pulse">Loading activity logs...</div>;
   }
@@ -105,7 +110,7 @@ const ActivityLogs = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="max-w-md truncate">
-                    {activity.activity_description ? String(activity.activity_description) : ''}
+                    {formatDescription(activity.activity_description)}
                   </TableCell>
                   <TableCell>{activity.ip_address || 'N/A'}</TableCell>
                   <TableCell>
