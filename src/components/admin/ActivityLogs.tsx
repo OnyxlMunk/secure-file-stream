@@ -56,6 +56,14 @@ const ActivityLogs = () => {
     }
   };
 
+  const formatDate = (dateValue: unknown): string => {
+    try {
+      return dateValue ? new Date(String(dateValue)).toLocaleString() : 'N/A';
+    } catch {
+      return 'Invalid Date';
+    }
+  };
+
   if (isLoading) {
     return <div className="animate-pulse">Loading activity logs...</div>;
   }
@@ -99,13 +107,7 @@ const ActivityLogs = () => {
                   </TableCell>
                   <TableCell>{activity.ip_address || 'N/A'}</TableCell>
                   <TableCell>
-                    {(() => {
-                      try {
-                        return activity.created_at ? new Date(String(activity.created_at)).toLocaleString() : 'N/A';
-                      } catch {
-                        return 'Invalid Date';
-                      }
-                    })()}
+                    {formatDate(activity.created_at)}
                   </TableCell>
                 </TableRow>
               ))}
