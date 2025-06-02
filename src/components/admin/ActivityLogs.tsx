@@ -24,7 +24,7 @@ const ActivityLogs = () => {
         .from('user_activities')
         .select(`
           *,
-          profiles!user_activities_user_id_fkey (
+          profiles (
             email,
             full_name
           )
