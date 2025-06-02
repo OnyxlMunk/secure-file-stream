@@ -99,7 +99,13 @@ const ActivityLogs = () => {
                   </TableCell>
                   <TableCell>{activity.ip_address || 'N/A'}</TableCell>
                   <TableCell>
-                    {activity.created_at ? new Date(String(activity.created_at)).toLocaleString() : 'N/A'}
+                    {(() => {
+                      try {
+                        return activity.created_at ? new Date(String(activity.created_at)).toLocaleString() : 'N/A';
+                      } catch {
+                        return 'Invalid Date';
+                      }
+                    })()}
                   </TableCell>
                 </TableRow>
               ))}
