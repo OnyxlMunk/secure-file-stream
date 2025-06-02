@@ -20,26 +20,56 @@ const ActivityLogs = () => {
   const { data: activities, isLoading } = useQuery({
     queryKey: ['admin-activities'],
     queryFn: async (): Promise<UserActivityWithProfile[]> => {
-      const { data, error } = await supabase
+      // First, get all activities
+      const { data: activitiesData, error: activitiesError } = await supabase
         .from('user_activities')
-        .select(`
-          *,
-          profiles (
-            email,
-            full_name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) {
-        console.error('Error fetching activities:', error);
-        throw error;
+      if (activitiesError) {
+        console.error('Error fetching activities:', activitiesError);
+        throw activitiesError;
       }
 
-      // Filter and validate the joined data
-      const validActivities = (data || []).filter(isValidActivity);
-      return validActivities as UserActivityWithProfile[];
+      if (!activitiesData || activitiesData.length === 0) {
+        return [];
+      }
+
+      // Get unique user IDs from activities
+      const userIds = [...new Set(activitiesData.map(activity => activity.user_id))];
+
+      // Fetch profiles for these user IDs
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, full_name')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        // Continue without profiles data
+      }
+
+      // Create a map of user_id to profile for quick lookup
+      const profilesMap = new Map();
+      if (profilesData) {
+        profilesData.forEach(profile => {
+          profilesMap.set(profile.id, {
+            email: profile.email,
+            full_name: profile.full_name
+          });
+        });
+      }
+
+      // Combine activities with profile data
+      const activitiesWithProfiles = activitiesData
+        .filter(isValidActivity)
+        .map(activity => ({
+          ...activity,
+          profiles: profilesMap.get(activity.user_id) || null
+        }));
+
+      return activitiesWithProfiles as UserActivityWithProfile[];
     }
   });
 
