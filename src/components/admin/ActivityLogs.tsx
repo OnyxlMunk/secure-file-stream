@@ -20,51 +20,26 @@ const ActivityLogs = () => {
   const { data: activities, isLoading } = useQuery({
     queryKey: ['admin-activities'],
     queryFn: async (): Promise<UserActivityWithProfile[]> => {
-      // First, try to get activities with profile data using a manual join
-      const { data: activitiesData, error: activitiesError } = await supabase
+      const { data, error } = await supabase
         .from('user_activities')
-        .select('*')
+        .select(`
+          *,
+          profiles!user_activities_user_id_fkey (
+            email,
+            full_name
+          )
+        `)
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (activitiesError) {
-        console.error('Error fetching activities:', activitiesError);
-        throw activitiesError;
+      if (error) {
+        console.error('Error fetching activities:', error);
+        throw error;
       }
 
-      // Filter and validate the activities data
-      const validActivities = (activitiesData || []).filter(isValidActivity);
-
-      // Now get profile data for each user_id
-      const userIds = [...new Set(validActivities.map(activity => activity.user_id))];
-      
-      if (userIds.length === 0) {
-        return validActivities.map(activity => ({ ...activity, profiles: null }));
-      }
-
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, email, full_name')
-        .in('id', userIds);
-
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-        // Return activities without profile data if profiles query fails
-        return validActivities.map(activity => ({ ...activity, profiles: null }));
-      }
-
-      // Create a map of user_id to profile data
-      const profilesMap = new Map(
-        (profilesData || []).map(profile => [profile.id, profile])
-      );
-
-      // Combine activities with profile data
-      const activitiesWithProfiles: UserActivityWithProfile[] = validActivities.map(activity => ({
-        ...activity,
-        profiles: profilesMap.get(activity.user_id) || null
-      }));
-
-      return activitiesWithProfiles;
+      // Filter and validate the joined data
+      const validActivities = (data || []).filter(isValidActivity);
+      return validActivities as UserActivityWithProfile[];
     }
   });
 
