@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Users, FileText, Activity, Settings, Bot, Api, BarChart3 } from 'lucide-react';
+import { Users, FileText, Activity, Settings, Bot, BarChart3 } from 'lucide-react';
 import UserManagement from './UserManagement';
 import FileManagement from './FileManagement';
 import ActivityLogs from './ActivityLogs';
@@ -19,7 +19,7 @@ const AdminDashboard = () => {
     { id: 'files', label: 'File Management', icon: FileText },
     { id: 'activity', label: 'Activity Logs', icon: Activity },
     { id: 'chatbot', label: 'AI Assistant', icon: Bot },
-    { id: 'api', label: 'API Manager', icon: Api },
+    { id: 'api', label: 'API Manager', icon: Settings },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
