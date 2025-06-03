@@ -42,39 +42,58 @@ const Index = () => {
     setFiles(prev => prev.filter(file => file.id !== id));
   };
 
-  const handleDownloadFile = (id: string) => {
+  const handleDownloadFile = async (id: string) => {
     const file = files.find(f => f.id === id);
     if (!file || !file.result) return;
 
-    let blob: Blob;
-    let filename: string;
+    try {
+      let blob: Blob;
+      let filename: string;
 
-    if ('encryptedData' in file.result) {
-      blob = CryptoService.createEncryptedBlob(
-        file.result.encryptedData,
-        file.result.iv,
-        file.result.salt,
-        file.result.filename
-      );
-      filename = `${file.originalFile.name}.encrypted`;
-    } else {
-      blob = new Blob([file.result.decryptedData]);
-      filename = file.result.filename;
+      if ('storagePath' in file.result) {
+        // Download from storage and decrypt
+        const decryptionResult = await CryptoService.downloadAndDecryptFile(
+          file.result.storagePath,
+          password
+        );
+        blob = new Blob([decryptionResult.decryptedData]);
+        filename = decryptionResult.originalFilename;
+      } else if ('encryptedData' in file.result) {
+        // Legacy: create encrypted blob for download
+        blob = CryptoService.createEncryptedBlob(
+          file.result.encryptedData,
+          file.result.iv,
+          file.result.salt,
+          file.result.filename
+        );
+        filename = `${file.originalFile.name}.encrypted`;
+      } else {
+        // Decrypted data
+        blob = new Blob([file.result.decryptedData]);
+        filename = file.result.filename;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download started",
+        description: `Downloading ${filename}`,
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download failed",
+        description: "Failed to download and decrypt file",
+        variant: "destructive",
+      });
     }
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    toast({
-      title: "Download started",
-      description: `Downloading ${filename}`,
-    });
   };
 
   const checkPoints = (operation: OperationType, fileCount: number) => {
@@ -177,9 +196,12 @@ const Index = () => {
         let result;
 
         if (operation === 'encrypt') {
-          const encryptionResult = await CryptoService.encryptFile(
+          // Encrypt and upload to storage
+          const storageResult = await CryptoService.encryptAndUploadFile(
             file.originalFile,
             password,
+            profile?.id!,
+            selectedBankId || undefined,
             (progress) => {
               setFiles(prev => prev.map(f => 
                 f.id === file.id ? { ...f, progress } : f
@@ -188,7 +210,7 @@ const Index = () => {
           );
           
           result = {
-            ...encryptionResult,
+            ...storageResult,
             filename: file.originalFile.name,
           };
 
@@ -201,7 +223,8 @@ const Index = () => {
                 original_filename: file.originalFile.name,
                 encrypted_filename: `${file.originalFile.name}.encrypted`,
                 file_size: file.originalFile.size,
-                points_cost: 1
+                points_cost: 1,
+                storage_path: storageResult.storagePath
               })
               .select()
               .single();
@@ -210,11 +233,31 @@ const Index = () => {
               console.error('Error saving file record:', dbError);
             } else if (fileRecord) {
               processedFileIds.push(fileRecord.id);
+              
+              // Update file with encrypted file ID
+              setFiles(prev => prev.map(f => 
+                f.id === file.id ? { 
+                  ...f, 
+                  encryptedFileId: fileRecord.id,
+                  storagePath: storageResult.storagePath
+                } : f
+              ));
+
+              // If a file bank is selected, add the file to it
+              if (selectedBankId) {
+                await supabase
+                  .from('file_bank_files')
+                  .insert({
+                    file_bank_id: selectedBankId,
+                    encrypted_file_id: fileRecord.id
+                  });
+              }
             }
           } catch (dbError) {
             console.error('Database error:', dbError);
           }
         } else {
+          // Decrypt from uploaded file
           const parsedFile = await CryptoService.parseEncryptedFile(file.originalFile);
           const decryptedData = await CryptoService.decryptFile(
             parsedFile.encryptedData,
@@ -273,8 +316,8 @@ const Index = () => {
     }
   };
 
-  const completedFiles = files.filter(f => f.status === 'completed' && 'encryptedData' in (f.result || {}));
-  const encryptedFileIds = completedFiles.map(f => f.id);
+  const completedFiles = files.filter(f => f.status === 'completed' && 'storagePath' in (f.result || {}));
+  const encryptedFileIds = completedFiles.map(f => f.encryptedFileId).filter(Boolean) as string[];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -350,7 +393,8 @@ const Index = () => {
           <h3 className="font-semibold text-blue-900 mb-2">Security Notice</h3>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• All encryption/decryption happens locally in your browser</li>
-            <li>• Your files and passwords are never sent to any server</li>
+            <li>• Encrypted files are stored securely in Supabase Storage</li>
+            <li>• Your passwords are never sent to any server</li>
             <li>• Uses AES-256-GCM encryption with PBKDF2 key derivation</li>
             <li>• Each operation costs 1 point from your account</li>
           </ul>

@@ -109,6 +109,7 @@ export type Database = {
           metadata: Json | null
           original_filename: string
           points_cost: number | null
+          storage_path: string | null
           user_id: string
         }
         Insert: {
@@ -120,6 +121,7 @@ export type Database = {
           metadata?: Json | null
           original_filename: string
           points_cost?: number | null
+          storage_path?: string | null
           user_id: string
         }
         Update: {
@@ -131,6 +133,7 @@ export type Database = {
           metadata?: Json | null
           original_filename?: string
           points_cost?: number | null
+          storage_path?: string | null
           user_id?: string
         }
         Relationships: [

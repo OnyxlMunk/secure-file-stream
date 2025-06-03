@@ -7,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { FolderPlus, Folder, FileText, Trash2, Plus } from 'lucide-react';
+import { FolderPlus, Folder, FileText, Trash2, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { CryptoService } from '@/utils/crypto';
 
 interface FileBank {
   id: string;
@@ -27,6 +28,7 @@ interface EncryptedFile {
   file_size: number;
   encryption_date: string;
   points_cost: number;
+  storage_path: string | null;
 }
 
 const FileBankManager = () => {
@@ -37,6 +39,7 @@ const FileBankManager = () => {
   const [newBankName, setNewBankName] = useState('');
   const [newBankDescription, setNewBankDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [downloadPassword, setDownloadPassword] = useState('');
   const { profile } = useAuth();
   const { toast } = useToast();
 
@@ -112,6 +115,30 @@ const FileBankManager = () => {
 
   const deleteFileBank = async (bankId: string) => {
     try {
+      // Get files in the bank before deletion
+      const { data: bankFiles } = await supabase
+        .from('file_bank_files')
+        .select(`
+          encrypted_files (
+            storage_path
+          )
+        `)
+        .eq('file_bank_id', bankId);
+
+      // Delete files from storage
+      if (bankFiles) {
+        for (const item of bankFiles) {
+          const file = item.encrypted_files as any;
+          if (file?.storage_path) {
+            try {
+              await CryptoService.deleteStorageFile(file.storage_path);
+            } catch (error) {
+              console.error('Error deleting storage file:', error);
+            }
+          }
+        }
+      }
+
       const { error } = await supabase
         .from('file_banks')
         .delete()
@@ -150,7 +177,8 @@ const FileBankManager = () => {
             encrypted_filename,
             file_size,
             encryption_date,
-            points_cost
+            points_cost,
+            storage_path
           )
         `)
         .eq('file_bank_id', bankId);
@@ -172,6 +200,81 @@ const FileBankManager = () => {
   const selectBank = (bank: FileBank) => {
     setSelectedBank(bank);
     fetchBankFiles(bank.id);
+  };
+
+  const downloadFile = async (file: EncryptedFile) => {
+    if (!downloadPassword) {
+      toast({
+        title: "Password required",
+        description: "Please enter the decryption password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!file.storage_path) {
+      toast({
+        title: "File not available",
+        description: "This file is not stored in the current storage system",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { decryptedData, originalFilename } = await CryptoService.downloadAndDecryptFile(
+        file.storage_path,
+        downloadPassword
+      );
+
+      const blob = new Blob([decryptedData]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = originalFilename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download successful",
+        description: `Downloaded ${originalFilename}`,
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download failed",
+        description: "Failed to download and decrypt file. Check your password.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const removeFileFromBank = async (fileId: string, bankId: string) => {
+    try {
+      const { error } = await supabase
+        .from('file_bank_files')
+        .delete()
+        .eq('file_bank_id', bankId)
+        .eq('encrypted_file_id', fileId);
+
+      if (error) throw error;
+
+      setBankFiles(prev => prev.filter(file => file.id !== fileId));
+      
+      toast({
+        title: "File removed",
+        description: "File removed from bank",
+      });
+    } catch (error) {
+      console.error('Error removing file from bank:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove file from bank",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -235,6 +338,25 @@ const FileBankManager = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {selectedBank && bankFiles.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Download Files</CardTitle>
+            <CardDescription>
+              Enter your decryption password to download files from "{selectedBank.name}"
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Input
+              type="password"
+              value={downloadPassword}
+              onChange={(e) => setDownloadPassword(e.target.value)}
+              placeholder="Enter decryption password"
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* File Banks List */}
@@ -323,8 +445,28 @@ const FileBankManager = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(file.encryption_date).toLocaleDateString()}
+                      <div className="flex items-center gap-2">
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(file.encryption_date).toLocaleDateString()}
+                        </div>
+                        {file.storage_path && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => downloadFile(file)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeFileFromBank(file.id, selectedBank.id)}
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>

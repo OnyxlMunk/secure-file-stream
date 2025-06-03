@@ -6,6 +6,13 @@ export interface EncryptionResult {
   filename: string;
 }
 
+export interface StorageEncryptionResult {
+  storagePath: string;
+  iv: Uint8Array;
+  salt: Uint8Array;
+  filename: string;
+}
+
 export interface DecryptionResult {
   decryptedData: ArrayBuffer;
   filename: string;
@@ -23,8 +30,10 @@ export interface ProcessedFile {
   originalFile: File;
   status: 'pending' | 'processing' | 'completed' | 'error';
   progress: number;
-  result?: EncryptionResult | DecryptionResult;
+  result?: EncryptionResult | DecryptionResult | StorageEncryptionResult;
   error?: string;
+  storagePath?: string;
+  encryptedFileId?: string;
 }
 
 export type OperationType = 'encrypt' | 'decrypt';

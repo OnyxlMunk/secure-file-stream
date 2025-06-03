@@ -1,4 +1,6 @@
 
+import { supabase } from '@/integrations/supabase/client';
+
 const ALGORITHM = { name: 'AES-GCM', length: 256 };
 const PBKDF2_ITERATIONS = 600000; // Strong iteration count for production
 const IV_LENGTH = 12; // 96 bits for AES-GCM
@@ -31,6 +33,95 @@ export class CryptoService {
 
   static generateRandomBytes(length: number): Uint8Array {
     return crypto.getRandomValues(new Uint8Array(length));
+  }
+
+  static async encryptAndUploadFile(
+    file: File,
+    password: string,
+    userId: string,
+    fileBankId?: string,
+    onProgress?: (progress: number) => void
+  ): Promise<{ storagePath: string; iv: Uint8Array; salt: Uint8Array }> {
+    const salt = this.generateRandomBytes(SALT_LENGTH);
+    const iv = this.generateRandomBytes(IV_LENGTH);
+    const key = await this.deriveKey(password, salt);
+    
+    if (onProgress) onProgress(25);
+    
+    const fileData = await file.arrayBuffer();
+    
+    if (onProgress) onProgress(50);
+    
+    const encryptedData = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv },
+      key,
+      fileData
+    );
+    
+    if (onProgress) onProgress(75);
+    
+    // Create encrypted blob with metadata
+    const encryptedBlob = this.createEncryptedBlob(encryptedData, iv, salt, file.name);
+    
+    // Generate storage path
+    const timestamp = Date.now();
+    const fileExtension = file.name.split('.').pop() || 'file';
+    const baseFolder = fileBankId ? `file-banks/${fileBankId}` : 'standalone';
+    const storagePath = `${userId}/${baseFolder}/${timestamp}_${file.name}.encrypted`;
+    
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from('encrypted-files')
+      .upload(storagePath, encryptedBlob, {
+        contentType: 'application/octet-stream',
+        upsert: false
+      });
+    
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError);
+      throw new Error(`Failed to upload file: ${uploadError.message}`);
+    }
+    
+    if (onProgress) onProgress(100);
+    
+    return { storagePath, iv, salt };
+  }
+
+  static async downloadAndDecryptFile(
+    storagePath: string,
+    password: string,
+    onProgress?: (progress: number) => void
+  ): Promise<{ decryptedData: ArrayBuffer; originalFilename: string }> {
+    if (onProgress) onProgress(25);
+    
+    // Download from Supabase Storage
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from('encrypted-files')
+      .download(storagePath);
+    
+    if (downloadError || !fileData) {
+      console.error('Storage download error:', downloadError);
+      throw new Error(`Failed to download file: ${downloadError?.message || 'File not found'}`);
+    }
+    
+    if (onProgress) onProgress(50);
+    
+    // Parse encrypted file
+    const { encryptedData, iv, salt, originalFilename } = await this.parseEncryptedFile(fileData);
+    
+    if (onProgress) onProgress(75);
+    
+    // Decrypt the data
+    const key = await this.deriveKey(password, salt);
+    const decryptedData = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv },
+      key,
+      encryptedData
+    );
+    
+    if (onProgress) onProgress(100);
+    
+    return { decryptedData, originalFilename };
   }
 
   static async encryptFile(
@@ -113,7 +204,7 @@ export class CryptoService {
     return new Blob([combined], { type: 'application/octet-stream' });
   }
 
-  static async parseEncryptedFile(file: File): Promise<{
+  static async parseEncryptedFile(file: File | Blob): Promise<{
     encryptedData: ArrayBuffer;
     iv: Uint8Array;
     salt: Uint8Array;
@@ -148,5 +239,16 @@ export class CryptoService {
       salt,
       originalFilename: header.filename,
     };
+  }
+
+  static async deleteStorageFile(storagePath: string): Promise<void> {
+    const { error } = await supabase.storage
+      .from('encrypted-files')
+      .remove([storagePath]);
+    
+    if (error) {
+      console.error('Error deleting file from storage:', error);
+      throw new Error(`Failed to delete file: ${error.message}`);
+    }
   }
 }
