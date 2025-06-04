@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
 import Success from "./pages/Success";
 import Administrator from "./pages/Administrator";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,11 @@ const App = () => (
             <Route path="/subscription" element={
               <ProtectedRoute>
                 <Subscription />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             } />
             <Route path="/success" element={

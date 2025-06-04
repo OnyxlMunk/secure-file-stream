@@ -220,38 +220,53 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string | null
           email: string
           full_name: string | null
           id: string
+          last_login_at: string | null
           max_file_size_mb: number | null
           max_monthly_encryptions: number | null
+          phone: string | null
           points: number | null
+          profile_completed: boolean | null
           subscription_tier: string | null
+          timezone: string | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string | null
           email: string
           full_name?: string | null
           id: string
+          last_login_at?: string | null
           max_file_size_mb?: number | null
           max_monthly_encryptions?: number | null
+          phone?: string | null
           points?: number | null
+          profile_completed?: boolean | null
           subscription_tier?: string | null
+          timezone?: string | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string | null
           email?: string
           full_name?: string | null
           id?: string
+          last_login_at?: string | null
           max_file_size_mb?: number | null
           max_monthly_encryptions?: number | null
+          phone?: string | null
           points?: number | null
+          profile_completed?: boolean | null
           subscription_tier?: string | null
+          timezone?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -367,6 +382,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string | null
+          email_notifications: boolean | null
+          id: string
+          language: string | null
+          theme: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          language?: string | null
+          theme?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          language?: string | null
+          theme?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

@@ -112,10 +112,12 @@ const Header = () => {
                 </span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>Profile</span>
-              </DropdownMenuItem>
+              <Link to="/profile">
+                <DropdownMenuItem className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuItem 
                 className="flex items-center gap-2 text-red-600"
                 onClick={signOut}
