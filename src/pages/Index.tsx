@@ -13,7 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/layout/Header';
 import FileBankSelector from '@/components/FileBankSelector';
-import { FloatingGraphics, RetroGraphicOverlay, OrganicDivider } from '@/components/ui/organic-graphics';
+import { FloatingGraphics, OrganicDivider } from '@/components/ui/organic-graphics';
 
 const Index = () => {
   const [password, setPassword] = useState('');
@@ -326,38 +326,36 @@ const Index = () => {
       <Header />
       
       <div className="max-w-4xl mx-auto p-4 space-y-8 relative z-10">
-        {/* Welcome Section with Retro Graphics */}
-        <RetroGraphicOverlay>
-          <div className="text-center space-y-4 pt-8">
-            <NeomorphicCard className="inline-block p-6">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Lock className="h-12 w-12 text-retro-purple animate-pulse" />
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-retro-cyan to-retro-green rounded-full animate-float" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-retro font-bold text-retro-purple">
-                    WELCOME_BACK
-                  </h2>
-                  <p className="font-pixel text-retro-cyan">
-                    {'>'} {profile?.full_name || 'USER'}
-                  </p>
-                </div>
+        {/* Welcome Section */}
+        <div className="text-center space-y-4 pt-8">
+          <NeomorphicCard className="inline-block p-6">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Lock className="h-12 w-12 text-retro-purple animate-pulse" />
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-retro-cyan to-retro-green rounded-full animate-float" />
               </div>
-            </NeomorphicCard>
-            
-            <NeomorphicCard variant="inset" className="inline-block p-4">
-              <div className="flex items-center justify-center gap-6 text-sm font-pixel">
-                <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-retro-cyan animate-pulse" />
-                  <span className="text-retro-purple">POINTS: {profile?.points || 0}</span>
-                </div>
-                <span className="text-retro-pink">•</span>
-                <span className="text-retro-green">PLAN: {profile?.subscription_tier || 'FREE'}</span>
+              <div>
+                <h2 className="text-2xl font-retro font-bold text-retro-purple">
+                  WELCOME_BACK
+                </h2>
+                <p className="font-pixel text-retro-cyan">
+                  {'>'} {profile?.full_name || 'USER'}
+                </p>
               </div>
-            </NeomorphicCard>
-          </div>
-        </RetroGraphicOverlay>
+            </div>
+          </NeomorphicCard>
+          
+          <NeomorphicCard variant="inset" className="inline-block p-4">
+            <div className="flex items-center justify-center gap-6 text-sm font-pixel">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-retro-cyan animate-pulse" />
+                <span className="text-retro-purple">POINTS: {profile?.points || 0}</span>
+              </div>
+              <span className="text-retro-pink">•</span>
+              <span className="text-retro-green">PLAN: {profile?.subscription_tier || 'FREE'}</span>
+            </div>
+          </NeomorphicCard>
+        </div>
 
         <OrganicDivider />
 
@@ -458,33 +456,31 @@ const Index = () => {
         <NeomorphicCard variant="inset" className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-cyan-50/50" />
           <NeomorphicCardContent className="relative">
-            <RetroGraphicOverlay>
-              <div className="text-center mb-4">
-                <h3 className="font-retro font-bold text-retro-purple text-lg mb-2">
-                  SECURITY_PROTOCOL
-                </h3>
-                <div className="flex justify-center">
-                  <div className="h-px w-24 bg-gradient-to-r from-retro-cyan via-retro-purple to-retro-pink" />
-                </div>
+            <div className="text-center mb-4">
+              <h3 className="font-retro font-bold text-retro-purple text-lg mb-2">
+                SECURITY_PROTOCOL
+              </h3>
+              <div className="flex justify-center">
+                <div className="h-px w-24 bg-gradient-to-r from-retro-cyan via-retro-purple to-retro-pink" />
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-pixel text-sm">
-                <div className="space-y-2">
-                  <p className="text-retro-cyan">{'>'} Local browser encryption</p>
-                  <p className="text-retro-green">{'>'} Secure Supabase storage</p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-retro-pink">{'>'} Zero password transmission</p>
-                  <p className="text-retro-purple">{'>'} AES-256-GCM + PBKDF2</p>
-                </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-pixel text-sm">
+              <div className="space-y-2">
+                <p className="text-retro-cyan">{'>'} Local browser encryption</p>
+                <p className="text-retro-green">{'>'} Secure Supabase storage</p>
               </div>
-              
-              <div className="text-center mt-4">
-                <p className="text-xs font-pixel text-retro-cyan opacity-75">
-                  {'>'} Each operation costs 1 point from your account
-                </p>
+              <div className="space-y-2">
+                <p className="text-retro-pink">{'>'} Zero password transmission</p>
+                <p className="text-retro-purple">{'>'} AES-256-GCM + PBKDF2</p>
               </div>
-            </RetroGraphicOverlay>
+            </div>
+            
+            <div className="text-center mt-4">
+              <p className="text-xs font-pixel text-retro-cyan opacity-75">
+                {'>'} Each operation costs 1 point from your account
+              </p>
+            </div>
           </NeomorphicCardContent>
         </NeomorphicCard>
       </div>
