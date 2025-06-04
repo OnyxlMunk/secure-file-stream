@@ -23,9 +23,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ============================================================================
   // TEMPORARY BYPASS: Mock authentication state for testing
   // ============================================================================
-  // Mock user and session for testing purposes
+  // Use a proper UUID format for the mock user
+  const mockUserId = '550e8400-e29b-41d4-a716-446655440000';
+  
   const mockUser: User = {
-    id: 'mock-user-id',
+    id: mockUserId,
     email: 'test@example.com',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -56,11 +58,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const mockProfile = {
-    id: 'mock-user-id',
+    id: mockUserId,
     email: 'test@example.com',
     full_name: 'Test User',
     subscription_tier: 'free',
-    points: 100
+    points: 100,
+    bio: 'This is a test user for development purposes.',
+    phone: '+1-555-0123',
+    timezone: 'UTC',
+    profile_completed: true,
+    avatar_url: null,
+    max_file_size_mb: 10,
+    max_monthly_encryptions: 10,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    last_login_at: new Date().toISOString()
   };
 
   // Mock state - always authenticated as admin

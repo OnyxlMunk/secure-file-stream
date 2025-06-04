@@ -7,7 +7,8 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface UserPreferences {
   email_notifications: boolean;
@@ -25,6 +26,7 @@ const AccountPreferences = () => {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -36,25 +38,38 @@ const AccountPreferences = () => {
     if (!user) return;
 
     try {
+      setError(null);
+      console.log('Fetching preferences for user:', user.id);
+      
       const { data, error } = await supabase
         .from('user_preferences')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) {
+        console.error('Error fetching preferences:', error);
+        throw error;
+      }
 
       if (data) {
+        console.log('Loaded preferences:', data);
         setPreferences({
           email_notifications: data.email_notifications,
           theme: data.theme,
           language: data.language
         });
+      } else {
+        console.log('No preferences found, using defaults');
+        // No preferences found, create default ones
+        await createDefaultPreferences();
       }
     } catch (error: any) {
+      console.error('Failed to load preferences:', error);
+      setError(`Failed to load preferences: ${error.message}`);
       toast({
-        title: "Error",
-        description: "Failed to load preferences",
+        title: "Warning",
+        description: "Could not load your preferences. Using defaults.",
         variant: "destructive",
       });
     } finally {
@@ -62,11 +77,42 @@ const AccountPreferences = () => {
     }
   };
 
+  const createDefaultPreferences = async () => {
+    if (!user) return;
+
+    try {
+      console.log('Creating default preferences for user:', user.id);
+      
+      const { error } = await supabase
+        .from('user_preferences')
+        .insert({
+          user_id: user.id,
+          email_notifications: true,
+          theme: 'light',
+          language: 'en'
+        });
+
+      if (error) {
+        console.error('Error creating default preferences:', error);
+        throw error;
+      }
+
+      console.log('Default preferences created successfully');
+    } catch (error: any) {
+      console.error('Failed to create default preferences:', error);
+      // Don't throw here, just log the error
+    }
+  };
+
   const savePreferences = async () => {
     if (!user) return;
 
     setSaving(true);
+    setError(null);
+    
     try {
+      console.log('Saving preferences:', preferences);
+      
       const { error } = await supabase
         .from('user_preferences')
         .upsert({
@@ -75,13 +121,19 @@ const AccountPreferences = () => {
           updated_at: new Date().toISOString()
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving preferences:', error);
+        throw error;
+      }
 
+      console.log('Preferences saved successfully');
       toast({
         title: "Success",
         description: "Preferences saved successfully",
       });
     } catch (error: any) {
+      console.error('Failed to save preferences:', error);
+      setError(`Failed to save preferences: ${error.message}`);
       toast({
         title: "Error",
         description: error.message,
@@ -102,6 +154,13 @@ const AccountPreferences = () => {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Notification Settings</h3>
         
