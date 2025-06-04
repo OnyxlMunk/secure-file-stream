@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,12 +62,28 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				retro: {
+					pink: '#FF6B9D',
+					purple: '#A855F7',
+					cyan: '#06B6D4',
+					green: '#10B981'
 				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				blob: '30% 70% 70% 30% / 30% 30% 70% 70%'
+			},
+			boxShadow: {
+				'neomorphic-inset': 'inset 5px 5px 10px #d1d9e6, inset -5px -5px 10px #ffffff',
+				'neomorphic-outset': '5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff',
+				'neomorphic-pressed': 'inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff'
+			},
+			fontFamily: {
+				'pixel': ['Courier New', 'monospace'],
+				'retro': ['Orbitron', 'monospace']
 			},
 			keyframes: {
 				'accordion-down': {
@@ -84,11 +101,24 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				float: {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				blob: {
+					'0%': { borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%' },
+					'25%': { borderRadius: '58% 42% 75% 25% / 76% 46% 54% 24%' },
+					'50%': { borderRadius: '50% 50% 33% 67% / 55% 27% 73% 45%' },
+					'75%': { borderRadius: '33% 67% 58% 42% / 63% 68% 32% 37%' },
+					'100%': { borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 3s ease-in-out infinite',
+				'blob': 'blob 7s ease-in-out infinite'
 			}
 		}
 	},

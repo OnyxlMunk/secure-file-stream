@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { NeomorphicCard, NeomorphicCardContent, NeomorphicCardDescription, NeomorphicCardHeader, NeomorphicCardTitle } from '@/components/ui/neomorphic-card';
+import { FloatingGraphics, RetroGraphicOverlay, OrganicDivider } from '@/components/ui/organic-graphics';
 import { User, Settings, Shield, BarChart3 } from 'lucide-react';
 import ProfileInfo from './ProfileInfo';
 import SecuritySettings from './SecuritySettings';
@@ -10,86 +11,108 @@ import ProfileStats from './ProfileStats';
 
 const ProfileDashboard = () => {
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Profile</h1>
-        <p className="text-muted-foreground">Manage your account settings and preferences</p>
-      </div>
+    <div className="max-w-6xl mx-auto p-6 relative">
+      <FloatingGraphics />
+      
+      <RetroGraphicOverlay>
+        <div className="mb-8 relative z-10">
+          <h1 className="text-4xl font-bold mb-2 font-retro bg-gradient-to-r from-retro-pink via-retro-purple to-retro-cyan bg-clip-text text-transparent animate-pulse">
+            PROFILE.EXE
+          </h1>
+          <p className="text-muted-foreground font-pixel text-retro-cyan">
+            > Manage your account settings and preferences_
+          </p>
+        </div>
+      </RetroGraphicOverlay>
 
-      <Tabs defaultValue="info" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="info" className="flex items-center gap-2">
+      <OrganicDivider />
+
+      <Tabs defaultValue="info" className="space-y-6 relative z-10">
+        <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-gray-100 to-gray-200 shadow-neomorphic-inset rounded-2xl p-2">
+          <TabsTrigger 
+            value="info" 
+            className="flex items-center gap-2 font-pixel text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-retro-pink data-[state=active]:to-retro-purple data-[state=active]:text-white data-[state=active]:shadow-neomorphic-outset rounded-xl transition-all duration-300"
+          >
             <User className="h-4 w-4" />
-            Profile Info
+            INFO.DAT
           </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="security" 
+            className="flex items-center gap-2 font-pixel text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-retro-cyan data-[state=active]:to-retro-green data-[state=active]:text-black data-[state=active]:shadow-neomorphic-outset rounded-xl transition-all duration-300"
+          >
             <Shield className="h-4 w-4" />
-            Security
+            SEC.SYS
           </TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="preferences" 
+            className="flex items-center gap-2 font-pixel text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-retro-purple data-[state=active]:to-retro-pink data-[state=active]:text-white data-[state=active]:shadow-neomorphic-outset rounded-xl transition-all duration-300"
+          >
             <Settings className="h-4 w-4" />
-            Preferences
+            PREF.CFG
           </TabsTrigger>
-          <TabsTrigger value="stats" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="stats" 
+            className="flex items-center gap-2 font-pixel text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-retro-green data-[state=active]:to-retro-cyan data-[state=active]:text-black data-[state=active]:shadow-neomorphic-outset rounded-xl transition-all duration-300"
+          >
             <BarChart3 className="h-4 w-4" />
-            Statistics
+            STATS.LOG
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="info">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>
-                Update your personal information and profile picture
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          <NeomorphicCard className="hover:shadow-neomorphic-pressed transition-all duration-500">
+            <NeomorphicCardHeader>
+              <NeomorphicCardTitle>Profile Information</NeomorphicCardTitle>
+              <NeomorphicCardDescription>
+                > Update your personal information and profile picture
+              </NeomorphicCardDescription>
+            </NeomorphicCardHeader>
+            <NeomorphicCardContent>
               <ProfileInfo />
-            </CardContent>
-          </Card>
+            </NeomorphicCardContent>
+          </NeomorphicCard>
         </TabsContent>
 
         <TabsContent value="security">
-          <Card>
-            <CardHeader>
-              <CardTitle>Security Settings</CardTitle>
-              <CardDescription>
-                Manage your password and account security
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          <NeomorphicCard className="hover:shadow-neomorphic-pressed transition-all duration-500">
+            <NeomorphicCardHeader>
+              <NeomorphicCardTitle>Security Settings</NeomorphicCardTitle>
+              <NeomorphicCardDescription>
+                > Manage your password and account security
+              </NeomorphicCardDescription>
+            </NeomorphicCardHeader>
+            <NeomorphicCardContent>
               <SecuritySettings />
-            </CardContent>
-          </Card>
+            </NeomorphicCardContent>
+          </NeomorphicCard>
         </TabsContent>
 
         <TabsContent value="preferences">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Preferences</CardTitle>
-              <CardDescription>
-                Customize your account settings and notifications
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          <NeomorphicCard className="hover:shadow-neomorphic-pressed transition-all duration-500">
+            <NeomorphicCardHeader>
+              <NeomorphicCardTitle>Account Preferences</NeomorphicCardTitle>
+              <NeomorphicCardDescription>
+                > Customize your account settings and notifications
+              </NeomorphicCardDescription>
+            </NeomorphicCardHeader>
+            <NeomorphicCardContent>
               <AccountPreferences />
-            </CardContent>
-          </Card>
+            </NeomorphicCardContent>
+          </NeomorphicCard>
         </TabsContent>
 
         <TabsContent value="stats">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Statistics</CardTitle>
-              <CardDescription>
-                View your account activity and usage statistics
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          <NeomorphicCard className="hover:shadow-neomorphic-pressed transition-all duration-500">
+            <NeomorphicCardHeader>
+              <NeomorphicCardTitle>Account Statistics</NeomorphicCardTitle>
+              <NeomorphicCardDescription>
+                > View your account activity and usage statistics
+              </NeomorphicCardDescription>
+            </NeomorphicCardHeader>
+            <NeomorphicCardContent>
               <ProfileStats />
-            </CardContent>
-          </Card>
+            </NeomorphicCardContent>
+          </NeomorphicCard>
         </TabsContent>
       </Tabs>
     </div>
