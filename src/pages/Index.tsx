@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/layout/Header';
 import FileBankSelector from '@/components/FileBankSelector';
 import { FloatingGraphics, OrganicDivider } from '@/components/ui/organic-graphics';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const Index = () => {
   const [password, setPassword] = useState('');
@@ -321,170 +322,219 @@ const Index = () => {
   const encryptedFileIds = completedFiles.map(f => f.encryptedFileId).filter(Boolean) as string[];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-      <FloatingGraphics />
-      <Header />
-      
-      <div className="max-w-4xl mx-auto p-4 space-y-8 relative z-10">
-        {/* Welcome Section */}
-        <div className="text-center space-y-4 pt-8">
-          <NeomorphicCard className="inline-block p-6">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Lock className="h-12 w-12 text-retro-purple animate-pulse" />
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-retro-cyan to-retro-green rounded-full animate-float" />
+    <TooltipProvider>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+        <FloatingGraphics />
+        <Header />
+        
+        <div className="max-w-4xl mx-auto p-4 space-y-8 relative z-10">
+          {/* Welcome Section */}
+          <div className="text-center space-y-4 pt-8">
+            <NeomorphicCard className="inline-block p-6">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Lock className="h-12 w-12 text-retro-purple animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-retro-cyan to-retro-green rounded-full animate-float" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-retro font-bold text-retro-purple">
+                    WELCOME_BACK
+                  </h2>
+                  <p className="font-pixel text-retro-cyan">
+                    {'>'} {profile?.full_name || 'USER'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-2xl font-retro font-bold text-retro-purple">
-                  WELCOME_BACK
-                </h2>
-                <p className="font-pixel text-retro-cyan">
-                  {'>'} {profile?.full_name || 'USER'}
-                </p>
+            </NeomorphicCard>
+            
+            <NeomorphicCard variant="inset" className="inline-block p-4">
+              <div className="flex items-center justify-center gap-6 text-sm font-pixel">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-retro-cyan animate-pulse" />
+                  <span className="text-retro-purple">POINTS: {profile?.points || 0}</span>
+                </div>
+                <span className="text-retro-pink">•</span>
+                <span className="text-retro-green">PLAN: {profile?.subscription_tier || 'FREE'}</span>
               </div>
-            </div>
-          </NeomorphicCard>
-          
-          <NeomorphicCard variant="inset" className="inline-block p-4">
-            <div className="flex items-center justify-center gap-6 text-sm font-pixel">
-              <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-retro-cyan animate-pulse" />
-                <span className="text-retro-purple">POINTS: {profile?.points || 0}</span>
-              </div>
-              <span className="text-retro-pink">•</span>
-              <span className="text-retro-green">PLAN: {profile?.subscription_tier || 'FREE'}</span>
-            </div>
-          </NeomorphicCard>
-        </div>
+            </NeomorphicCard>
+          </div>
 
-        <OrganicDivider />
+          <OrganicDivider />
 
-        {/* Main Encryption Interface */}
-        <NeomorphicCard className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-retro-pink/5 via-transparent to-retro-cyan/5 pointer-events-none" />
-          
-          <NeomorphicCardHeader>
-            <NeomorphicCardTitle className="text-center flex items-center justify-center gap-3">
-              <Shield className="h-8 w-8 text-retro-purple animate-pulse" />
-              SECURE_FILE_PROCESSOR
-            </NeomorphicCardTitle>
-          </NeomorphicCardHeader>
-          
-          <NeomorphicCardContent className="space-y-6 relative">
-            {/* Enhanced File Drop Zone */}
-            <div className="relative">
-              <div className="absolute -inset-2 bg-gradient-to-r from-retro-pink via-retro-purple to-retro-cyan rounded-lg opacity-20 animate-blob blur-xl" />
+          {/* Main Encryption Interface */}
+          <NeomorphicCard className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-retro-pink/5 via-transparent to-retro-cyan/5 pointer-events-none" />
+            
+            <NeomorphicCardHeader>
+              <NeomorphicCardTitle className="text-center flex items-center justify-center gap-3">
+                <Shield className="h-8 w-8 text-retro-purple animate-pulse" />
+                SECURE_FILE_PROCESSOR
+              </NeomorphicCardTitle>
+            </NeomorphicCardHeader>
+            
+            <NeomorphicCardContent className="space-y-6 relative">
+              {/* Enhanced File Drop Zone */}
               <div className="relative">
-                <FileDropZone 
-                  onFilesSelected={handleFilesSelected} 
-                  className="bg-gradient-to-br from-gray-50 to-gray-100 shadow-neomorphic-inset border-0 hover:shadow-neomorphic-pressed transition-all duration-300"
+                <div className="absolute -inset-2 bg-gradient-to-r from-retro-pink via-retro-purple to-retro-cyan rounded-lg opacity-20 animate-blob blur-xl" />
+                <div className="relative">
+                  <FileDropZone 
+                    onFilesSelected={handleFilesSelected} 
+                    className="bg-gradient-to-br from-gray-50 to-gray-100 shadow-neomorphic-inset border-0 hover:shadow-neomorphic-pressed transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              {/* Enhanced Password Input */}
+              <div className="relative">
+                <label className="block text-sm font-pixel text-retro-purple mb-2">
+                  {'>'} ENCRYPTION_KEY
+                </label>
+                <PasswordInput
+                  value={password}
+                  onChange={setPassword}
+                  placeholder="Enter secure passphrase (12+ chars)..."
+                  className="bg-gradient-to-r from-gray-50 to-gray-100 shadow-neomorphic-inset border-0 focus:shadow-neomorphic-pressed font-pixel"
                 />
               </div>
-            </div>
 
-            {/* Enhanced Password Input */}
-            <div className="relative">
-              <label className="block text-sm font-pixel text-retro-purple mb-2">
-                {'>'} ENCRYPTION_KEY
-              </label>
-              <PasswordInput
-                value={password}
-                onChange={setPassword}
-                placeholder="Enter secure passphrase (12+ chars)..."
-                className="bg-gradient-to-r from-gray-50 to-gray-100 shadow-neomorphic-inset border-0 focus:shadow-neomorphic-pressed font-pixel"
+              {/* Retro Action Buttons */}
+              <div className="flex gap-4 justify-center">
+                <RetroButton
+                  onClick={() => processFiles('encrypt')}
+                  disabled={isProcessing || !password || files.filter(f => f.status === 'pending').length === 0}
+                  variant="default"
+                  size="lg"
+                  className="relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-retro-pink to-retro-purple opacity-20 animate-pulse" />
+                  <Shield className="h-5 w-5" />
+                  ENCRYPT_FILES
+                  <span className="text-xs opacity-75">(1pt each)</span>
+                </RetroButton>
+                
+                <RetroButton
+                  variant="cyber"
+                  onClick={() => processFiles('decrypt')}
+                  disabled={isProcessing || !password || files.filter(f => f.status === 'pending').length === 0}
+                  size="lg"
+                  className="relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-retro-cyan to-retro-green opacity-20 animate-pulse" />
+                  <Download className="h-5 w-5" />
+                  DECRYPT_FILES
+                  <span className="text-xs opacity-75">(1pt each)</span>
+                </RetroButton>
+              </div>
+
+              {/* File Organization Section */}
+              {completedFiles.length > 0 && (
+                <>
+                  <OrganicDivider />
+                  <NeomorphicCard variant="inset" className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-pixel font-medium text-retro-purple">
+                        {'>'} ORGANIZE_FILES
+                      </h3>
+                      <FileBankSelector
+                        selectedBankId={selectedBankId}
+                        onBankSelect={setSelectedBankId}
+                        fileIds={encryptedFileIds}
+                      />
+                    </div>
+                  </NeomorphicCard>
+                </>
+              )}
+
+              {/* Enhanced File List */}
+              <FileList
+                files={files}
+                onRemoveFile={handleRemoveFile}
+                onDownloadFile={handleDownloadFile}
               />
-            </div>
+            </NeomorphicCardContent>
+          </NeomorphicCard>
 
-            {/* Retro Action Buttons */}
-            <div className="flex gap-4 justify-center">
-              <RetroButton
-                onClick={() => processFiles('encrypt')}
-                disabled={isProcessing || !password || files.filter(f => f.status === 'pending').length === 0}
-                variant="default"
-                size="lg"
-                className="relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-retro-pink to-retro-purple opacity-20 animate-pulse" />
-                <Shield className="h-5 w-5" />
-                ENCRYPT_FILES
-                <span className="text-xs opacity-75">(1pt each)</span>
-              </RetroButton>
+          {/* Enhanced Security Notice */}
+          <NeomorphicCard variant="inset" className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-cyan-50/50" />
+            <NeomorphicCardContent className="relative">
+              <div className="text-center mb-4">
+                <h3 className="font-retro font-bold text-retro-purple text-lg mb-2">
+                  SECURITY_PROTOCOL
+                </h3>
+                <div className="flex justify-center">
+                  <div className="h-px w-24 bg-gradient-to-r from-retro-cyan via-retro-purple to-retro-pink" />
+                </div>
+              </div>
               
-              <RetroButton
-                variant="cyber"
-                onClick={() => processFiles('decrypt')}
-                disabled={isProcessing || !password || files.filter(f => f.status === 'pending').length === 0}
-                size="lg"
-                className="relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-retro-cyan to-retro-green opacity-20 animate-pulse" />
-                <Download className="h-5 w-5" />
-                DECRYPT_FILES
-                <span className="text-xs opacity-75">(1pt each)</span>
-              </RetroButton>
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-pixel text-sm">
+                <div className="space-y-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-retro-cyan cursor-help hover:text-retro-cyan/80 transition-colors border-b border-dotted border-retro-cyan/30 hover:border-retro-cyan/60">
+                        {'>'} Local browser encryption
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs p-3 bg-gradient-to-br from-gray-50 to-gray-100 shadow-neomorphic-outset border-0 font-pixel text-xs">
+                      <p className="text-retro-purple">
+                        All files are encrypted directly in your browser using Web Crypto API before any data leaves your device
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
 
-            {/* File Organization Section */}
-            {completedFiles.length > 0 && (
-              <>
-                <OrganicDivider />
-                <NeomorphicCard variant="inset" className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-pixel font-medium text-retro-purple">
-                      {'>'} ORGANIZE_FILES
-                    </h3>
-                    <FileBankSelector
-                      selectedBankId={selectedBankId}
-                      onBankSelect={setSelectedBankId}
-                      fileIds={encryptedFileIds}
-                    />
-                  </div>
-                </NeomorphicCard>
-              </>
-            )}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-retro-green cursor-help hover:text-retro-green/80 transition-colors border-b border-dotted border-retro-green/30 hover:border-retro-green/60">
+                        {'>'} Secure Supabase storage
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs p-3 bg-gradient-to-br from-gray-50 to-gray-100 shadow-neomorphic-outset border-0 font-pixel text-xs">
+                      <p className="text-retro-purple">
+                        Encrypted files are stored using Supabase's enterprise-grade infrastructure with automatic backups and redundancy
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <div className="space-y-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-retro-pink cursor-help hover:text-retro-pink/80 transition-colors border-b border-dotted border-retro-pink/30 hover:border-retro-pink/60">
+                        {'>'} Zero password transmission
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs p-3 bg-gradient-to-br from-gray-50 to-gray-100 shadow-neomorphic-outset border-0 font-pixel text-xs">
+                      <p className="text-retro-purple">
+                        Your passwords never leave your device - they're only used locally to generate encryption keys
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
 
-            {/* Enhanced File List */}
-            <FileList
-              files={files}
-              onRemoveFile={handleRemoveFile}
-              onDownloadFile={handleDownloadFile}
-            />
-          </NeomorphicCardContent>
-        </NeomorphicCard>
-
-        {/* Enhanced Security Notice */}
-        <NeomorphicCard variant="inset" className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-cyan-50/50" />
-          <NeomorphicCardContent className="relative">
-            <div className="text-center mb-4">
-              <h3 className="font-retro font-bold text-retro-purple text-lg mb-2">
-                SECURITY_PROTOCOL
-              </h3>
-              <div className="flex justify-center">
-                <div className="h-px w-24 bg-gradient-to-r from-retro-cyan via-retro-purple to-retro-pink" />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-retro-purple cursor-help hover:text-retro-purple/80 transition-colors border-b border-dotted border-retro-purple/30 hover:border-retro-purple/60">
+                        {'>'} AES-256-GCM + PBKDF2
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-sm p-3 bg-gradient-to-br from-gray-50 to-gray-100 shadow-neomorphic-outset border-0 font-pixel text-xs">
+                      <div className="space-y-2 text-retro-purple">
+                        <p><strong>AES-256-GCM:</strong> Advanced Encryption Standard with 256-bit keys using Galois/Counter Mode for authenticated encryption</p>
+                        <p><strong>PBKDF2:</strong> Password-Based Key Derivation Function 2 for secure key generation from passwords</p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-pixel text-sm">
-              <div className="space-y-2">
-                <p className="text-retro-cyan">{'>'} Local browser encryption</p>
-                <p className="text-retro-green">{'>'} Secure Supabase storage</p>
+              
+              <div className="text-center mt-4">
+                <p className="text-xs font-pixel text-retro-cyan opacity-75">
+                  {'>'} Each operation costs 1 point from your account
+                </p>
               </div>
-              <div className="space-y-2">
-                <p className="text-retro-pink">{'>'} Zero password transmission</p>
-                <p className="text-retro-purple">{'>'} AES-256-GCM + PBKDF2</p>
-              </div>
-            </div>
-            
-            <div className="text-center mt-4">
-              <p className="text-xs font-pixel text-retro-cyan opacity-75">
-                {'>'} Each operation costs 1 point from your account
-              </p>
-            </div>
-          </NeomorphicCardContent>
-        </NeomorphicCard>
+            </NeomorphicCardContent>
+          </NeomorphicCard>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
