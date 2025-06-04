@@ -20,7 +20,7 @@ const ProfileDashboard = () => {
             PROFILE.EXE
           </h1>
           <p className="text-muted-foreground font-pixel text-retro-cyan">
-            > Manage your account settings and preferences_
+            {'>'} Manage your account settings and preferences_
           </p>
         </div>
       </RetroGraphicOverlay>
@@ -64,7 +64,7 @@ const ProfileDashboard = () => {
             <NeomorphicCardHeader>
               <NeomorphicCardTitle>Profile Information</NeomorphicCardTitle>
               <NeomorphicCardDescription>
-                > Update your personal information and profile picture
+                {'>'} Update your personal information and profile picture
               </NeomorphicCardDescription>
             </NeomorphicCardHeader>
             <NeomorphicCardContent>
@@ -78,7 +78,7 @@ const ProfileDashboard = () => {
             <NeomorphicCardHeader>
               <NeomorphicCardTitle>Security Settings</NeomorphicCardTitle>
               <NeomorphicCardDescription>
-                > Manage your password and account security
+                {'>'} Manage your password and account security
               </NeomorphicCardDescription>
             </NeomorphicCardHeader>
             <NeomorphicCardContent>
@@ -92,7 +92,7 @@ const ProfileDashboard = () => {
             <NeomorphicCardHeader>
               <NeomorphicCardTitle>Account Preferences</NeomorphicCardTitle>
               <NeomorphicCardDescription>
-                > Customize your account settings and notifications
+                {'>'} Customize your account settings and notifications
               </NeomorphicCardDescription>
             </NeomorphicCardHeader>
             <NeomorphicCardContent>
@@ -106,7 +106,7 @@ const ProfileDashboard = () => {
             <NeomorphicCardHeader>
               <NeomorphicCardTitle>Account Statistics</NeomorphicCardTitle>
               <NeomorphicCardDescription>
-                > View your account activity and usage statistics
+                {'>'} View your account activity and usage statistics
               </NeomorphicCardDescription>
             </NeomorphicCardHeader>
             <NeomorphicCardContent>

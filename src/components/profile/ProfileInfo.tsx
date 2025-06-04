@@ -158,7 +158,7 @@ const ProfileInfo = () => {
               className="hidden"
             />
             <p className="text-sm text-retro-cyan mt-2 font-pixel">
-              > JPG, PNG, or GIF. Max 5MB.
+              {'>'} JPG, PNG, or GIF. Max 5MB.
             </p>
           </div>
         </div>
@@ -176,7 +176,7 @@ const ProfileInfo = () => {
             className="bg-gradient-to-r from-gray-100 to-gray-200 shadow-neomorphic-inset font-pixel border-0 focus:shadow-neomorphic-pressed"
           />
           <p className="text-xs text-retro-cyan font-pixel">
-            > Email cannot be changed here. Use Security settings to update.
+            {'>'} Email cannot be changed here. Use Security settings to update.
           </p>
         </div>
 
@@ -219,7 +219,7 @@ const ProfileInfo = () => {
           id="bio"
           className="bg-gradient-to-r from-gray-50 to-gray-100 shadow-neomorphic-inset font-pixel border-0 focus:shadow-neomorphic-pressed resize-none"
           {...register('bio')}
-          placeholder="> Tell us about yourself..."
+          placeholder="{'>'} Tell us about yourself..."
           rows={4}
         />
       </div>
